@@ -1,24 +1,34 @@
-from flask import Flask, render_template
-
 from data import db_session
 from data.job import Jobs
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
+import datetime
 
 
-@app.route("/")
-@app.route("/index")
-def index():
+def add_job(team_leader, job_, work_size, collaborators, start_date, is_finished):
+    jobs = Jobs()
+    jobs.team_leader = team_leader
+    jobs.job = job_
+    jobs.work_size = work_size
+    jobs.collaborators = collaborators
+    jobs.start_date = start_date
+    jobs.is_finished = is_finished
+
     db_sess = db_session.create_session()
-    news = db_sess.query(Jobs).filter(Jobs.is_private != True)
-    return render_template("index.html", news=news)
+    db_sess.add(jobs)
+    db_sess.commit()
 
 
-def main():
-    db_session.global_init("db/blogs.db")
-    app.run()
+def fill_base():
+    temp_job = [(1, "deployment of residential modules 1 and 2", 15, "2, 3", datetime.datetime.now(), False),]
+    for job in temp_job:
+        try:
+            add_job(*job)
+        except Exception as e:
+            print(e, e.__class__.__name__)
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    db_session.global_init("db/mars_explorer.db")
+
+    fill_base()
+    print('-----')
